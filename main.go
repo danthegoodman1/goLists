@@ -3,6 +3,7 @@ package main
 import (
 	"container/list"
 	"fmt"
+	"github.com/MauriceGit/skiplist"
 	"log"
 	"time"
 )
@@ -17,6 +18,16 @@ type bigList struct {
 	len   int32
 	first *listItem
 	last  *listItem
+}
+
+type Element int
+
+// Implement the interface used in skiplist
+func (e Element) ExtractKey() float64 {
+	return float64(e)
+}
+func (e Element) String() string {
+	return fmt.Sprintf("%03d", e)
 }
 
 func testMine(testSize int, searchItem int) (taken time.Duration) {
@@ -49,7 +60,7 @@ func testMine(testSize int, searchItem int) (taken time.Duration) {
 	return totalDiff
 }
 
-func testTheirs(testSize int, searchItem int) (taken time.Duration) {
+func testTheirs(testSize int, searchItem int) (taken time.Duration, traverseTime time.Duration) {
 	fmt.Println("Testing theirs...")
 	totalTime := time.Now()
 	l := list.New()
@@ -71,14 +82,49 @@ func testTheirs(testSize int, searchItem int) (taken time.Duration) {
 
 	totalDiff := end.Sub(totalTime)
 	log.Printf("TEST THEIRS COMPLETE - TIME SPENT: %v", totalDiff)
-	return totalDiff
+	return totalDiff, diff
+}
+
+func testSkip(testSize int, searchItem int) (taken time.Duration) {
+	fmt.Println("Testing skiplist...")
+	totalTime := time.Now()
+	list := skiplist.New()
+	// Insert some elements
+	for i := 0; i < testSize; i++ {
+		list.Insert(Element(i))
+	}
+
+	end := time.Now()
+	diff := end.Sub(totalTime)
+	log.Printf("LIST CONSTRUCTION COMPLETE - TIME SPENT: %v", diff)
+
+	start := time.Now()
+	// Find an element
+	if e, ok := list.Find(Element(testSize)); ok {
+		fmt.Println(e)
+	}
+
+	end = time.Now()
+	diff = end.Sub(start)
+
+	log.Printf("LIST SEARCH COMPLETE - TIME SPENT: %v", diff)
+
+	// Delete all elements
+	// for i := 0; i < testSize; i++ {
+	//     list.Delete(Element(i))
+	// }
+	totalDiff := end.Sub(totalTime)
+	log.Printf("TEST SKIPLIST COMPLETE - TIME SPENT: %v", totalDiff)
+	return diff
 }
 
 func main() {
 	log.Println("Going")
 	testSize := 10000000
 	searchItem := 453012
-	theirTime := testTheirs(testSize, searchItem)
+	theirTime, traverseTime := testTheirs(testSize, searchItem)
 	myTime := testMine(testSize, searchItem)
-	log.Printf("My speed advantage: %vx", float32(theirTime.Nanoseconds())/float32(myTime.Nanoseconds()))
+	skipTime := testSkip(testSize, searchItem)
+	log.Printf("My total speed advantage: %vx", float32(theirTime.Nanoseconds())/float32(myTime.Nanoseconds()))
+	log.Printf("Skiplist search advantage: %vx", float32(traverseTime.Nanoseconds())/float32(skipTime.Nanoseconds()))
 }
