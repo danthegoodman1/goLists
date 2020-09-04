@@ -1,0 +1,23 @@
+{
+  "name": "goLists",
+  "version": "1.0.0",
+  "description": "Turns out mine is about 2x-2.1x faster than the `container/list` library",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://danthegoodman1@github.com/danthegoodman1/goLists.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/danthegoodman1/goLists/issues"
+  },
+  "homepage": "https://github.com/danthegoodman1/goLists#readme",
+  "dependencies": {
+    "bplustree": "^2.0.1"
+  }
+}
