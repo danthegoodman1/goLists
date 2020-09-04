@@ -4,6 +4,8 @@ import (
 	"container/list"
 	"fmt"
 	"github.com/MauriceGit/skiplist"
+	"github.com/collinglass/bptree"
+	"github.com/google/btree"
 	"log"
 	"time"
 )
@@ -142,13 +144,87 @@ func testSkip(testSize int, searchItem int) (taken time.Duration) {
 	return diff
 }
 
+func testBTree(testSize int, searchItem int) (taken time.Duration) {
+	fmt.Println("Testing btree...")
+	totalTime := time.Now()
+	list := btree.New(2)
+	// Insert some elements
+	for i := 0; i < testSize; i++ {
+		list.ReplaceOrInsert(btree.Int(i))
+	}
+
+	end := time.Now()
+	diff := end.Sub(totalTime)
+	log.Printf("LIST CONSTRUCTION COMPLETE - TIME SPENT: %v", diff)
+
+	start := time.Now()
+	// Find an element
+	list.Get(btree.Int(searchItem))
+
+	end = time.Now()
+	diff = end.Sub(start)
+
+	log.Printf("LIST SEARCH COMPLETE - TIME SPENT: %v", diff)
+
+	// Delete all elements
+	// for i := 0; i < testSize; i++ {
+	//     list.Delete(Element(i))
+	// }
+	totalDiff := end.Sub(totalTime)
+	log.Printf("TEST BTREE COMPLETE - TIME SPENT: %v", totalDiff)
+
+	return diff
+}
+
+func testBPTree(testSize int, searchItem int) (taken time.Duration) {
+	fmt.Println("Testing b+tree...")
+	totalTime := time.Now()
+	list := bptree.NewTree()
+	// Insert some elements
+	for i := 0; i < testSize; i++ {
+		err := list.Insert(i, []byte(string(i)))
+		if err != nil {
+			fmt.Printf("error: %s\n\n", err)
+		}
+	}
+
+	end := time.Now()
+	diff := end.Sub(totalTime)
+	log.Printf("LIST CONSTRUCTION COMPLETE - TIME SPENT: %v", diff)
+
+	start := time.Now()
+	// Find an element
+	_, err := list.Find(searchItem, false)
+	if err != nil {
+		fmt.Printf("error: %s\n\n", err)
+	}
+
+	end = time.Now()
+	diff = end.Sub(start)
+
+	log.Printf("LIST SEARCH COMPLETE - TIME SPENT: %v", diff)
+
+	// Delete all elements
+	// for i := 0; i < testSize; i++ {
+	//     list.Delete(Element(i))
+	// }
+	totalDiff := end.Sub(totalTime)
+	log.Printf("TEST B+TREE COMPLETE - TIME SPENT: %v", totalDiff)
+
+	return diff
+}
+
 func main() {
 	log.Println("Going")
-	testSize := 10000000
+	testSize := 100000000
 	searchItem := 453012
 	theirTime, traverseTime := testTheirs(testSize, searchItem)
 	myTime := testMine(testSize, searchItem)
 	skipTime := testSkip(testSize, searchItem)
+	bTime := testBTree(testSize, searchItem)
+	bpTime := testBPTree(testSize, searchItem)
 	log.Printf("My total speed advantage: %vx", float32(theirTime.Nanoseconds())/float32(myTime.Nanoseconds()))
 	log.Printf("Skiplist search advantage: %vx", float32(traverseTime.Nanoseconds())/float32(skipTime.Nanoseconds()))
+	log.Printf("BTree search advantage: %vx", float32(traverseTime.Nanoseconds())/float32(bTime.Nanoseconds()))
+	log.Printf("B+Tree search advantage: %vx", float32(traverseTime.Nanoseconds())/float32(bpTime.Nanoseconds()))
 }
