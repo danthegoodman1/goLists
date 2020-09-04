@@ -20,14 +20,31 @@ type bigList struct {
 	last  *listItem
 }
 
-type Element int
+type Element struct {
+	key  int
+	data string
+}
+
+func stringToNum(input string) (num int) {
+	runes := []rune(input)
+	e := 0
+	for i := 0; i < len(runes); i++ {
+		e += int(runes[i])
+	}
+	return e
+}
+
+func NewElement(data string) (e Element) {
+	i := stringToNum(data)
+	return Element{i, fmt.Sprintf("hey%d", i)}
+}
 
 // Implement the interface used in skiplist
 func (e Element) ExtractKey() float64 {
-	return float64(e)
+	return float64(e.key)
 }
 func (e Element) String() string {
-	return fmt.Sprintf("%03d", e)
+	return e.data
 }
 
 func testMine(testSize int, searchItem int) (taken time.Duration) {
@@ -91,7 +108,8 @@ func testSkip(testSize int, searchItem int) (taken time.Duration) {
 	list := skiplist.New()
 	// Insert some elements
 	for i := 0; i < testSize; i++ {
-		list.Insert(Element(i))
+		newE := NewElement(string(i))
+		list.Insert(newE)
 	}
 
 	end := time.Now()
@@ -100,8 +118,9 @@ func testSkip(testSize int, searchItem int) (taken time.Duration) {
 
 	start := time.Now()
 	// Find an element
-	if e, ok := list.Find(Element(testSize)); ok {
-		fmt.Println(e)
+	newE := NewElement(string(searchItem))
+	if e, ok := list.Find(newE); ok {
+		fmt.Println(e.GetValue())
 	}
 
 	end = time.Now()
@@ -115,6 +134,11 @@ func testSkip(testSize int, searchItem int) (taken time.Duration) {
 	// }
 	totalDiff := end.Sub(totalTime)
 	log.Printf("TEST SKIPLIST COMPLETE - TIME SPENT: %v", totalDiff)
+
+	// smallest item:
+	sm := list.Next((list.GetSmallestNode()))
+	fmt.Println(sm.GetValue().String())
+
 	return diff
 }
 
